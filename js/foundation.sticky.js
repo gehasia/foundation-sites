@@ -26,14 +26,14 @@ class Sticky {
   }
 
   /**
-   * Initializes the sticky element by adding classes, getting/setting dimensions, breakpoints and attributes
+   * Initializes the sticky element by adding classes and load it.
    * @function
    * @private
    */
   _init() {
     var $parent = this.$element.parent('[data-sticky-container]'),
-        id = this.$element[0].id || Foundation.GetYoDigits(6, 'sticky'),
         _this = this;
+    this.elementid = this.$element[0].id || Foundation.GetYoDigits(6, 'sticky');
 
     if (!$parent.length) {
       this.wasWrapped = true;
@@ -42,28 +42,43 @@ class Sticky {
     this.$container.addClass(this.options.containerClass);
 
     this.$element.addClass(this.options.stickyClass)
-                 .attr({'data-resize': id});
+                 .attr({'data-resize': this.elementid});
 
     this.scrollCount = this.options.checkEvery;
     this.isStuck = false;
-    $(window).one('load.zf.sticky', function(){
-      //We calculate the container height to have correct values for anchor points offset calculation.
-      _this.containerHeight = _this.$element.css("display") == "none" ? 0 : _this.$element[0].getBoundingClientRect().height;
-      _this.$container.css('height', _this.containerHeight);
-      _this.elemHeight = _this.containerHeight;
-      if(_this.options.anchor !== ''){
-        _this.$anchor = $('#' + _this.options.anchor);
-      }else{
-        _this._parsePoints();
-      }
-
-      _this._setSizes(function(){
-        _this._calc(false);
+    //If initialized during window loading, we'll have to wait for windows.load event to fire for our plugin to finalize loading.
+    //If initialized after window load, this event will never fire : we load it directly.
+    if (document.readyState == "complete") {
+      this._load()
+    } else {
+      $(window).one('load.zf.sticky', function(){
+        _this._load();
       });
-      _this._events(id.split('-').reverse().join('-'));
-    });
+    }
   }
 
+  /**
+   * Load the element by getting/setting dimensions, breakpoints and attributes.
+   * @function
+   * @private
+   */
+   _load() {
+     //We calculate the container height to have correct values for anchor points offset calculation.
+     var _this = this;
+     this.containerHeight = this.$element.css("display") == "none" ? 0 : this.$element[0].getBoundingClientRect().height;
+     this.$container.css('height', this.containerHeight);
+     this.elemHeight = this.containerHeight;
+     if(this.options.anchor !== ''){
+       this.$anchor = $('#' + this.options.anchor);
+     }else{
+       this._parsePoints();
+     }
+
+     this._setSizes(function(){
+       _this._calc(false);
+     });
+     this._events(this.elementid.split('-').reverse().join('-'));
+   }
   /**
    * If using multiple elements as anchors, calculates the top and bottom pixel values the sticky thing should stick and unstick on.
    * @function
