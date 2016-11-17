@@ -300,7 +300,8 @@ class Sticky {
     var _this = this,
         newElemWidth = this.$container[0].getBoundingClientRect().width,
         comp = window.getComputedStyle(this.$container[0]),
-        pdng = parseInt(comp['padding-right'], 10);
+        pdngl = parseInt(comp['padding-left'], 10),
+        pdngr = parseInt(comp['padding-right'], 10);
 
     if (this.$anchor && this.$anchor.length) {
       this.anchorHeight = this.$anchor[0].getBoundingClientRect().height;
@@ -309,7 +310,7 @@ class Sticky {
     }
 
     this.$element.css({
-      'max-width': `${newElemWidth - pdng}px`
+      'max-width': `${newElemWidth - pdngl - pdngr}px`
     });
 
     var newContainerHeight = height || this.$element[0].getBoundingClientRect().height || this.containerHeight;
